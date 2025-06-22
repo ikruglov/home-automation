@@ -1,0 +1,86 @@
+esphome:
+  name: create-ceiling-fan-tuya
+  friendly_name: "Create Ceiling Fan"
+
+  platformio_options:
+    board_build.mcu: esp32c3
+    board_build.f_cpu: 160000000L
+    board_build.f_flash: 40000000L
+    board_build.flash_mode: dio
+
+esp32:
+  board: esp32-c3-devkitm-1
+  variant: esp32c3
+  framework:
+    type: esp-idf
+
+logger:
+  level: INFO
+  baud_rate: 0 # disable UART logging
+
+# sync time with home assistant
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+
+api:
+
+ota:
+  - platform: esphome
+
+wifi:
+  ssid: 'XXX'
+  password: 'XXX'
+
+uart:
+  rx_pin: GPIO20
+  tx_pin: GPIO21
+  baud_rate: 9600
+  debug: # log UART communication
+
+tuya:
+  id: "tuya_device"
+  time_id: homeassistant_time
+
+fan:
+  - platform: "tuya"
+    id: fan_device
+    name: "Fan"
+    switch_datapoint: 60
+    speed_datapoint: 62
+    direction_datapoint: 63
+    speed_count: 6
+    restore_mode: ALWAYS_OFF
+
+light:
+  - platform: "tuya"
+    id: light_device
+    name: "Light"
+    switch_datapoint: 20
+    restore_mode: ALWAYS_OFF
+    #color_temperature_datapoint: 23
+    #warm_white_color_temperature: 500 mireds
+    #cold_white_color_temperature: 153 mireds
+    #color_temperature_max_value: 500
+    dimmer_datapoint: 22
+    max_value: 1000
+
+binary_sensor:
+  - platform: status
+    name: "Status"
+    device_class: connectivity
+
+sensor:
+  - platform: wifi_signal
+    name: "Wifi Signal"
+    update_interval: 60s
+    icon: mdi:wifi
+
+  - platform: uptime
+    name: "Uptime Seconds"
+    update_interval: 60s
+    icon: mdi:clock-outline
+
+button:
+  - platform: restart
+    name: "Restart"
