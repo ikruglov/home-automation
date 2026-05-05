@@ -65,6 +65,13 @@ light:
     dimmer_datapoint: 22
     max_value: 1000
 
+switch:
+  - platform: "tuya"
+    id: switch_device
+    name: "Buzzer"
+    switch_datapoint: 66
+    restore_mode: ALWAYS_OFF
+
 binary_sensor:
   - platform: status
     name: "Status"
