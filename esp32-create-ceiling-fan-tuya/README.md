@@ -1,54 +1,99 @@
-# esp32-create-ceiling-fan-tuya
+[← All projects](../README.md)
 
-Schematic, PCB design, and ESPHome configuration for integrating [Create
-Ceiling Fan](https://www.create-store.com/uk/2401-buy-ceiling-fans) into Home
-Assistant.
+# Create ceiling-fan retrofit
 
-I've designed a custom PCB with an ESP32-c3 chip, which completely replaces the
-WBR3 and daughter boards. I then used ESPHome to flash the chip with the Tuya
-config.
+**A custom ESP32-C3 interface board and ESPHome configuration for fan, light, and buzzer control in Home Assistant.**
 
-Note: The fan should already have WiFi. Plus, unfortunately, the same Create
-Ceiling Fan model has different underlying control modules. So, for this repo
-to be practical, your fan should be exactly like mine. See the attached
-pictures.
+<img src="images/assembled-pcb-front.jpg" width="280" alt="Assembled replacement PCB, front: ESP32-C3 module, flash and reset buttons, and programming connections">
+<img src="images/assembled-pcb-back.jpg" width="280" alt="Assembled replacement PCB, back">
 
-## Source code
-* [esphome.yaml](esphome.yaml) - ESPHome YAML configuration file
-* [kicad](kicad) - KiCad PCB source code
+*The assembled replacement board, front and back.*
 
-## Pictures
+## Design
 
-### Original PCB
+The PCB replaces the WBR3 Wi-Fi module and associated daughterboard arrangement in the [Create ceiling fan](https://www.create-store.com/uk/2401-buy-ceiling-fans) shown below. The replacement uses an ESP32-C3 running ESPHome and communicates with the existing appliance controller through the Tuya UART protocol.
 
-Note: There is no daughter board with 5v<->3.3v logic.
+The fan's existing controller remains responsible for appliance control; ESPHome provides the [Tuya MCU protocol component](https://esphome.io/components/tuya/).
 
-* original PCB
+## PCB design
 
-![](images/original-pcb-front.jpg "Original PCB front")
-![](images/original-pcb-back.jpg "Original PCB back")
+The replacement board combines the ESP32-C3 module, support components, flash/reset buttons, and programming connections in the footprint shown below. Components and routing occupy both sides of the board; the module's antenna area is marked at the top of the layout.
 
-* original PCB installed  
+<a href="images/pcb-design-front.png"><img src="images/pcb-design-front.png" width="320" alt="Front PCB layout showing ESP32-C3 placement, antenna area, buttons, and programming header"></a>
+<a href="images/pcb-design-back.png"><img src="images/pcb-design-back.png" width="320" alt="Back PCB layout showing support components and routing"></a>
 
-![](images/original-pcb-installed.jpg "Original PCB installed")
+*Front and back layout views. Select either image for full resolution.*
 
-### New PCB
+[PCB source](kicad/create-celing-fan.kicad_pcb) · [Schematic source](kicad/create-celing-fan.kicad_sch) · [KiCad project](kicad/create-celing-fan.kicad_pro)
 
-* schematics
+<details>
+<summary>View the schematic</summary>
 
-![](images/schematics.png "Schematics")
+![Replacement interface-board schematic](images/schematics.png)
 
-* PCB design
+</details>
 
-![](images/pcb-design-front.png "PCB design front")
-![](images/pcb-design-back.png "PCB design back")
+### Fit in the original controller
 
-* assembled PCB
+<img src="images/installed-pcb-1.jpg" width="560" alt="Custom ESP32-C3 interface board fitted to the original ceiling-fan controller assembly">
 
-![](images/assembled-pcb-front.jpg "Assembled PCB front")
-![](images/assembled-pcb-back.jpg "Assembled PCB back")
+*The replacement interface board fitted to the existing controller assembly. The board outline and connection positions need to suit this hardware; the original motor and light controller remains in place.*
 
-* installed PCB
+## System overview
 
-![](images/installed-pcb-1.jpg "PCB installed 1")
-![](images/installed-pcb-2.jpg "PCB installed 2")
+```mermaid
+flowchart LR
+    HA[Home Assistant] <-->|Wi-Fi / ESPHome API| ESP[Custom ESP32-C3 board]
+    ESP <-->|Tuya UART · 9600 baud| MCU[Existing fan controller]
+    MCU --> FAN[Fan]
+    MCU --> LIGHT[Light]
+```
+
+The published configuration disables UART logging to leave that serial interface available for communication with the fan controller. Fan, light, and buzzer entities use `ALWAYS_OFF` as their configured restore mode.
+
+## Published firmware capabilities
+
+The [ESPHome configuration](esphome.yaml) maps the following Tuya datapoints:
+
+| Function | Datapoint(s) | Configuration |
+|---|---|---|
+| Fan | 60, 62, 63 | On/off, six speed levels, direction |
+| Light | 20, 22 | On/off and brightness |
+| Buzzer | 66 | On/off |
+
+It also exposes connection status, Wi-Fi signal, uptime, and a restart button. Color-temperature settings are commented out in the published YAML and are not presented here as an implemented feature.
+
+## Compatibility and sources
+
+**Match the controller hardware, not just the fan's product name.** This project was developed for a fan that already had Wi-Fi. The original project notes identify different controller modules sold under the same Create model name; compare your hardware with the original-board photographs below.
+
+| File | Contents |
+|---|---|
+| [esphome.yaml](esphome.yaml) | ESP32-C3 configuration and Tuya datapoint mappings |
+| [kicad/](kicad/) | Schematic, PCB layout, KiCad project, and component CSV |
+
+Before adapting the configuration, replace the `XXX` Wi-Fi placeholders and review device naming, API encryption, and OTA authentication. GPIO assignments and datapoint mappings describe the hardware shown here.
+
+The photographs document assembly and fitment to the original controller. They do not establish compatibility with other controller revisions.
+
+## Build gallery
+
+<details>
+<summary>Additional installation photograph</summary>
+
+![Replacement board fitted to the controller, second view](images/installed-pcb-2.jpg)
+
+</details>
+
+### Original hardware
+
+<details>
+<summary>Original board and installation — compare these before adapting the design</summary>
+
+The original photographed assembly does not have a separate 5 V ↔ 3.3 V logic daughterboard.
+
+![Original controller PCB, front](images/original-pcb-front.jpg)
+![Original controller PCB, back](images/original-pcb-back.jpg)
+![Original controller installed](images/original-pcb-installed.jpg)
+
+</details>
