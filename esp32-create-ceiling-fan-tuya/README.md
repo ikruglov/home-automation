@@ -24,7 +24,7 @@ The replacement board combines the ESP32-C3 module, support components, flash/re
 
 *Front and back layout views. Select either image for full resolution.*
 
-[PCB source](kicad/create-celing-fan.kicad_pcb) · [Schematic source](kicad/create-celing-fan.kicad_sch) · [KiCad project](kicad/create-celing-fan.kicad_pro)
+[PCB source](kicad/create-celing-fan.kicad_pcb) · [Schematic source](kicad/create-celing-fan.kicad_sch) · [KiCad project](kicad/create-celing-fan.kicad_pro) · [BOM](#bill-of-materials)
 
 <details>
 <summary>View the schematic</summary>
@@ -38,6 +38,13 @@ The replacement board combines the ESP32-C3 module, support components, flash/re
 <img src="images/installed-pcb-1.jpg" width="560" alt="Custom ESP32-C3 interface board fitted to the original ceiling-fan controller assembly">
 
 *The replacement interface board fitted to the existing controller assembly. The board outline and connection positions need to suit this hardware; the original motor and light controller remains in place.*
+
+## Bill of materials
+
+- [Assembly BOM (CSV)](bom.csv) — manufacturers, part numbers, quantities, and footprints.
+- [KiCad BOM export (CSV)](kicad/create-celing-fan.csv) — references, quantities, values, and footprints matching the published PCB.
+
+The assembled board used capacitors, resistors, and buttons from assortment kits. The assembly BOM reconstructs suitable part selections rather than an exact record of every fitted part; confirm substitutions and footprints before ordering assembly.
 
 ## System overview
 

@@ -1,0 +1,11 @@
+Item #,*Designator,*Qty,Manufacturer,*Mfg Part #,Description / Value,*Package/Footprint,Type,Your Instructions / Notes
+1,C1,1,Samsung Electro-Mechanics,CL21B106KOQNNNE,10uF,0805,SMD,https://www.lcsc.com/product-detail/C95841.html
+2,"C2,C4",2,Samsung Electro-Mechanics,CL21B104KBCNNNC,0.1uF,0805,SMD,https://www.lcsc.com/product-detail/C1711.html
+3,C3,1,Samsung Electro-Mechanics,CL21B105KBFNNNE,1uF,0805,SMD,https://www.lcsc.com/product-detail/C28323.html
+4,C5,1,FOSAN,FVH010ADA101M0554,100uF ±20% 10V Aluminum Electrolytic Capacitors,5x5.4,SMD,https://www.lcsc.com/product-detail/C7469983.html
+5,J1,1,JXTCONN,PM2.54-1X5PM-H85,"3A 5P Through Hole -40℃~+105℃ 8.5mm 1x5P 2.54mm Top 1 Square Hole Through Hole,P=2.54mm Headers, Receptacles, Female Sockets RoHS",P=2.54mm,Through Hole,https://www.lcsc.com/product-detail/C42431843.html
+6,"R1,R8,R9",3,FOJAN,FRC0805F1002TS,10kOm,0805,SMD,https://www.lcsc.com/product-detail/C2907219.html
+7,R2,1,FOJAN,FRC0805P000 TS,0Om,0805,SMD,https://www.lcsc.com/product-detail/C2907288.html
+8,SW1,1,XKB Connection,TS-1187A-B-A-B,Tactile Switch SPST 160gf 1.5mm 5.1mm x 5.1mm Surface Mount,"SMD-4P,5.1x5.1mm",SMD,https://www.lcsc.com/product-detail/C318884.html
+9,SW2,1,hanxia,HX PZ2.54-1x2P WZ,"Pin Header 2 Position 2.54mm Pitch Single Row Through Hole, Right Angle -40℃~+105℃",P=2.54mm,Through Hole,https://www.lcsc.com/product-detail/C32713261.html
+10,U1,1,ESPRESSIF,ESP32-C3-WROOM-02-N4,2.4GHz ESP32-C3 Chip On-board PCB Antenna -105dBm VFQFN-32-EP RF Transceiver Modules and Modems RoHS,VFQFN-32-EP,SMD,https://www.lcsc.com/product-detail/C2934560.html

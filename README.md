@@ -65,7 +65,7 @@ All four projects use ESPHome's firmware framework and protocol components. The 
 |---|---|---|---|
 | [APC AP7921](esp32-ap7921/) | [Four-layer controller overview](esp32-ap7921/#four-layer-controller-pcb) | [ESPHome configuration and components](esp32-ap7921/firmware/) | [Installed retrofit](esp32-ap7921/#board-swap-retrofit) · [USB-C insert STL](esp32-ap7921/usb-c-insert.stl) |
 | [Water-meter reader](esp32-water-meter/) | [KiCad design](esp32-water-meter/hardware/) | [ESPHome configuration](esp32-water-meter/firmware/) | [Case STL models](esp32-water-meter/case/) · [Development status](esp32-water-meter/#development-status) |
-| [Create ceiling fan](esp32-create-ceiling-fan-tuya/) | [KiCad design](esp32-create-ceiling-fan-tuya/kicad/) | [ESPHome configuration](esp32-create-ceiling-fan-tuya/esphome.yaml) | [Original and replacement hardware](esp32-create-ceiling-fan-tuya/#build-gallery) |
+| [Create ceiling fan](esp32-create-ceiling-fan-tuya/) | [KiCad design](esp32-create-ceiling-fan-tuya/kicad/) | [ESPHome configuration](esp32-create-ceiling-fan-tuya/esphome.yaml) | [BOM](esp32-create-ceiling-fan-tuya/#bill-of-materials) · [Build gallery](esp32-create-ceiling-fan-tuya/#build-gallery) |
 | [Climarad Sensa V2X](esp32-climarad-v2x/) | [KiCad design](esp32-climarad-v2x/kicad/) | [ESPHome configuration](esp32-climarad-v2x/esphome.yaml) | [Printable enclosure](esp32-climarad-v2x/case.3mf) |
 
 These are hardware-specific project records. Read the compatibility and configuration notes before adapting a design to another appliance.
