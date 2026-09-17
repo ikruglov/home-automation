@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# Required Notice: Copyright (c) 2025-2026 Ivan Kruglov
+# License: https://polyformproject.org/licenses/noncommercial/1.0.0
+
 substitutions:
   id_prefix: climarad_sensa_v2x
   name_prefix: "ClimaRad Sensa V2X"

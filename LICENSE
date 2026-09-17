@@ -1,21 +1,25 @@
-MIT License
+Repository licensing
 
-Copyright (c) 2025 Ivan Kruglov
+Copyright (c) 2025-2026 Ivan Kruglov
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Original material in this repository is licensed as follows:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. Software and firmware, including ESPHome YAML configurations:
+   PolyForm Noncommercial License 1.0.0
+   Full text: LICENSES/PolyForm-Noncommercial-1.0.0.txt
+   https://polyformproject.org/licenses/noncommercial/1.0.0
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+   Required Notice: Copyright (c) 2025-2026 Ivan Kruglov
+
+2. All other original material, including schematic and PCB design files,
+   enclosure design files, documentation, and photographs:
+   Creative Commons Attribution-NonCommercial 4.0 International
+   Full text: LICENSES/CC-BY-NC-4.0.txt
+   https://creativecommons.org/licenses/by-nc/4.0/
+
+These are separate licenses for the categories above, not a choice of
+license for the same material. The full, unmodified license texts govern.
+Third-party material retains its applicable licenses and notices.
+
+For a separate commercial license, contact Ivan Kruglov, the repository
+owner. Commercial permissions must be agreed in writing.

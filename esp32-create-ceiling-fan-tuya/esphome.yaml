@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# Required Notice: Copyright (c) 2025-2026 Ivan Kruglov
+# License: https://polyformproject.org/licenses/noncommercial/1.0.0
+
 esphome:
   name: create-ceiling-fan-tuya
   friendly_name: "Create Ceiling Fan"

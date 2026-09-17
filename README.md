@@ -45,4 +45,9 @@ Both projects use ESPHome's firmware framework and protocol components. The Clim
 
 These are hardware-specific project records. Read the compatibility and configuration notes before adapting a design to another appliance.
 
-[MIT license](LICENSE)
+## License
+
+- **Design files, documentation, and photographs:** [CC BY-NC 4.0](LICENSES/CC-BY-NC-4.0.txt).
+- **Software and ESPHome configurations:** [PolyForm Noncommercial 1.0.0](LICENSES/PolyForm-Noncommercial-1.0.0.txt).
+
+For commercial licensing, contact Ivan Kruglov. See [LICENSE](LICENSE) for scope.
