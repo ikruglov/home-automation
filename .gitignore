@@ -1,4 +1,28 @@
 .DS_Store
 **/*-backups
 **/.history
+
+# Local environments and ESPHome build output
 .venv/
+.esphome/
+.pio/
+
+# Local credentials; only explicit example files belong in Git
+secrets.yaml
+secrets.*.yaml
+!secrets.example.yaml
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+.credentials.json
+
+# KiCad machine-local state and library caches
+*.kicad_prl
+fp-info-cache
+*.kicad_sch.lck
+*.kicad_pcb.lck
+~$*
