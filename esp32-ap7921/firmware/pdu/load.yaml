@@ -1,0 +1,67 @@
+# Current thresholds and software indications. These are not protective circuit breakers.
+# Missing current readings clear indications and do not block outlet turn-on.
+
+number:
+  - platform: template
+    id: overload_alarm
+    name: "Overload Alarm Threshold"
+    entity_category: config
+    unit_of_measurement: A
+    optimistic: true
+    restore_value: true
+    initial_value: 16      # AP7921 is a 16A unit
+    min_value: 0
+    max_value: 32
+    step: 0.5
+    mode: box
+
+  - platform: template
+    id: near_overload_warning
+    name: "Near Overload Warning Threshold"
+    entity_category: config
+    unit_of_measurement: A
+    optimistic: true
+    restore_value: true
+    initial_value: 12
+    min_value: 0
+    max_value: 32
+    step: 0.5
+    mode: box
+
+  - platform: template
+    id: low_load_warning
+    name: "Low Load Warning Threshold"
+    entity_category: config
+    unit_of_measurement: A
+    optimistic: true
+    restore_value: true
+    initial_value: 0       # 0 = disabled, nothing is strictly below it
+    min_value: 0
+    max_value: 32
+    step: 0.5
+    mode: box
+
+binary_sensor:
+  - platform: template
+    id: overload_alarm_active
+    name: "Overload"
+    device_class: problem
+    lambda: |-
+      const float a = id(total_current).state;
+      return !std::isnan(a) && a > id(overload_alarm).state;
+
+  - platform: template
+    id: near_overload_active
+    name: "Near Overload"
+    device_class: problem
+    lambda: |-
+      const float a = id(total_current).state;
+      return !std::isnan(a) && a > id(near_overload_warning).state;
+
+  - platform: template
+    id: low_load_active
+    name: "Low Load"
+    device_class: problem
+    lambda: |-
+      const float a = id(total_current).state;
+      return !std::isnan(a) && a < id(low_load_warning).state;

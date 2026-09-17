@@ -1,0 +1,38 @@
+# Action: hold 5 seconds for IP scrolling; hold 10 seconds to flip the display.
+# Reset uses ESPHome safe mode: 10 unsuccessful boots, a 10-second good-boot window,
+# and a 60-second recovery timeout. Keep the boot window equal to status_led.yaml.
+
+script:
+  - id: button_hold
+    mode: restart
+    then:
+      - delay: 5s
+      - lambda: |-
+          id(display_scroll) = true;
+          id(display_scroll_pos) = 0;
+      - delay: 5s
+      - lambda: |-
+          id(display_scroll) = false;
+          id(display_inverted) = !id(display_inverted);
+      - script.execute: apply_display_orientation
+
+binary_sensor:
+  - platform: gpio
+    id: action_button
+    internal: true
+    pin:
+      number: GPIO9
+      mode:
+        input: true
+        pullup: true
+      inverted: true
+      ignore_strapping_warning: true
+    on_press:
+      - script.execute: button_hold
+    on_release:
+      - script.stop: button_hold
+
+safe_mode:
+  num_attempts: 10
+  boot_is_good_after: 10s
+  reboot_timeout: 60s

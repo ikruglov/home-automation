@@ -1,0 +1,44 @@
+# AP7921 controller firmware. Setup and behaviour: README.md.
+
+packages:
+  common: !include common.yaml
+  ethernet: !include pdu/ethernet.yaml
+  i2c: !include pdu/i2c.yaml
+  display: !include pdu/display.yaml
+  outlets: !include pdu/outlets.yaml
+  bl0939: !include pdu/bl0939.yaml
+  load: !include pdu/load.yaml
+  psu: !include pdu/psu.yaml
+  status_led: !include pdu/status_led.yaml
+  buttons: !include pdu/buttons.yaml
+
+external_components:
+  - source:
+      type: local
+      path: components
+    components: [ethernet, pcf8574, bl0939]
+  - source: github://trip5/esphome-tm1650@5c1f2490f87fbff75e097f4131b7d80884f38ad7
+    components: [tm1650]
+
+esphome:
+  name: ap7921
+  friendly_name: "APC AP7921 PDU"
+
+esp32:
+  board: esp32-c6-devkitc-1
+  variant: esp32c6
+  flash_size: 16MB
+  framework:
+    type: esp-idf
+
+api:
+  encryption:
+    key: !secret pdu_api_encryption_key
+
+ota:
+  - platform: esphome
+    password: !secret pdu_ota_password
+
+logger:
+  level: DEBUG
+  hardware_uart: USB_SERIAL_JTAG

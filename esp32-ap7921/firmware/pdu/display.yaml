@@ -1,0 +1,95 @@
+# Two-digit current display, persistent orientation and brightness, and IP scrolling.
+
+esphome:
+  on_boot:
+    - priority: -100
+      then:
+        - script.execute: apply_display_orientation
+
+globals:
+  - id: display_inverted
+    type: bool
+    restore_value: true
+    initial_value: 'false'
+  - id: display_scroll
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: display_scroll_pos
+    type: int
+    restore_value: false
+    initial_value: '0'
+
+script:
+  - id: apply_display_orientation
+    then:
+      - lambda: |-
+          const bool inv = id(display_inverted);
+          // Rotating the glyph 180 deg swaps glass A<->D, B<->E, C<->F; G and
+          // the dot are their own fixed points. Composed with this board's
+          // reversed segment wiring that gives PDCBGFEA. set_backward() flips
+          // the digit order so the two digits swap places as well.
+          id(seg_display).set_backward(inv);
+          id(seg_display).set_segment_map(inv ? "PDCBGFEA" : "PGFEDCBA");
+
+display:
+  - platform: tm1650
+    id: seg_display
+    i2c_id: i2c_display
+    length: 2        # DIG1/DIG2 only; DIG3/4 are NC
+    intensity: 8     # startup value; Display Brightness overrides it at runtime
+    segment_map: PGFEDCBA
+    update_interval: 300ms
+    lambda: |-
+      if (id(display_scroll)) {
+        char buf[network::IP_ADDRESS_BUFFER_SIZE];
+        network::get_ip_addresses()[0].str_to(buf);
+        // Split into display cells. A '.' rides along on the digit before it,
+        // which is exactly how print() consumes it - as that digit's dot - so a
+        // cell is never just a bare separator.
+        std::vector<std::string> cells{" ", " "};
+        for (const char *p = buf; *p != '\0'; p++) {
+          if (*p == '.' && cells.size() > 2) {
+            cells.back() += '.';
+          } else {
+            cells.emplace_back(1, *p);
+          }
+        }
+        cells.emplace_back(" ");
+        cells.emplace_back(" ");
+        const size_t pos = (size_t) id(display_scroll_pos);
+        if (pos + 2 > cells.size()) {
+          id(display_scroll) = false;
+          id(display_scroll_pos) = 0;
+        } else {
+          it.print((cells[pos] + cells[pos + 1]).c_str());
+          id(display_scroll_pos) = (int) pos + 1;
+        }
+      } else {
+        // Load current and nothing else, as the original does. Two digits plus
+        // a dot: one decimal below 10A, whole amps above it, which is the most
+        // the glass carries without dropping the leading digit.
+        const float a = id(total_current).state;
+        if (std::isnan(a)) {
+          it.print("--");
+        } else if (a < 9.95f) {
+          it.printf("%.1f", a);
+        } else {
+          it.printf("%2.0f", a);
+        }
+      }
+
+number:
+  - platform: template
+    id: display_brightness
+    name: "Display Brightness"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: 8
+    min_value: 0
+    max_value: 8
+    step: 1
+    mode: slider
+    on_value:
+      - lambda: "id(seg_display).set_intensity((uint8_t) x);"

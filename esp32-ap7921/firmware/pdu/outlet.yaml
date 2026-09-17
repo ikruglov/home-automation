@@ -1,0 +1,102 @@
+# Per-outlet control, overload restriction, persisted state, and cold-start delay.
+
+switch:
+  - platform: template
+    id: outlet_${n}
+    name: "Outlet ${n}"
+    restore_mode: DISABLED
+    turn_on_action:
+      - lambda: |-
+          // "Prevent users from applying power to outlets during an overload
+          // condition." Thresholds and the alarms live in pdu/load.yaml; the
+          // guide uses "has exceeded", so the comparison is strict.
+          const auto restriction = id(outlet_${n}_restriction).current_option();
+          const float amps = id(total_current).state;
+          bool blocked = false;
+          if (!std::isnan(amps)) {
+            if (restriction == "On Overload") {
+              blocked = amps > id(overload_alarm).state;
+            } else if (restriction == "On Warning") {
+              blocked = amps > id(near_overload_warning).state;
+            }
+          }
+          if (blocked) {
+            ESP_LOGW("outlet", "Outlet ${n} refused: %.2f A exceeds the '%s' threshold", amps,
+                     restriction.c_str());
+            id(outlet_${n}).publish_state(false);
+          } else {
+            id(relay_expander).digital_write(${bit}, false);
+            id(outlet_state) |= 1 << ${bit};
+            id(outlet_${n}).publish_state(true);
+            // Persist now. Left alone, a changed global waits up to 1s for the
+            // globals component's own poll to stage it, then up to
+            // flash_write_interval (60s default) for the flush - and a power cut
+            // inside that window would bring the outlets back in a stale
+            // "Previous" state. update() stages, sync() commits. Outlet changes
+            // are rare and deliberate, so the extra flash write costs nothing.
+            outlet_state->update();
+            global_preferences->sync();
+          }
+    turn_off_action:
+      - lambda: |-
+          id(relay_expander).digital_write(${bit}, true);
+          id(outlet_state) &= ~(1 << ${bit});
+          id(outlet_${n}).publish_state(false);
+          outlet_state->update();
+          global_preferences->sync();
+
+select:
+  - platform: template
+    id: outlet_${n}_restriction
+    name: "Outlet ${n} Overload Restriction"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_option: "None"
+    options:
+      - "None"          # apply power regardless of any alarm
+      - "On Warning"    # refuse once past the Near Overload Warning threshold
+      - "On Overload"   # refuse once past the Overload Alarm threshold
+
+  - platform: template
+    id: outlet_${n}_cold_start
+    name: "Outlet ${n} Cold Start State"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_option: "Previous"
+    options:
+      - "Off"
+      - "On"
+      - "Previous"
+
+number:
+  - platform: template
+    id: outlet_${n}_delay
+    name: "Outlet ${n} Power On Delay"
+    entity_category: config
+    unit_of_measurement: s
+    optimistic: true
+    restore_value: true
+    initial_value: 0
+    min_value: 0
+    max_value: 300
+    step: 1
+    mode: box
+
+script:
+  - id: outlet_${n}_cold_start_apply
+    mode: single
+    then:
+      - delay: !lambda "return (uint32_t) (id(outlet_${n}_delay).state * 1000.0f);"
+      - lambda: |-
+          // current_option(), not .state - Select stores an index internally
+          // and exposes the text as a StringRef, which compares to a literal.
+          const auto want = id(outlet_${n}_cold_start).current_option();
+          // Evaluated against the snapshot, not the live bitmask: restoring an
+          // earlier outlet mutates outlet_state, and an outlet with a longer
+          // delay would otherwise read a mask that has already changed.
+          const bool previously_on = ((id(outlet_state_boot) >> ${bit}) & 1) != 0;
+          if (want == "On" || (want == "Previous" && previously_on)) {
+            id(outlet_${n}).turn_on();
+          }

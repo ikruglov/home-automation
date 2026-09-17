@@ -1,0 +1,21 @@
+# Monitor both internal supply rails. ADC scaling is specific to this board.
+
+sensor:
+  - platform: adc
+    id: psu1_voltage
+    name: "PSU1 Voltage"
+    pin: GPIO0         # ADC1_CH0
+    attenuation: 12db
+    samples: 16
+    update_interval: 10s
+    filters:
+      - multiply: 18.45
+  - platform: adc
+    id: psu2_voltage
+    name: "PSU2 Voltage"
+    pin: GPIO1         # ADC1_CH1
+    attenuation: 12db
+    samples: 16
+    update_interval: 10s
+    filters:
+      - multiply: 18.45

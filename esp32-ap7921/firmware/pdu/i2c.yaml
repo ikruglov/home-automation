@@ -1,0 +1,15 @@
+# Display on the high-power I2C controller; relay expander on low-power I2C.
+
+i2c:
+  - id: i2c_display
+    sda: GPIO2       # LED_DAT
+    scl: GPIO3       # LED_CLK
+    frequency: 50kHz
+    scan: false      # verified: answers on 0x24-0x27 and 0x34-0x37
+
+  - id: i2c_outlets
+    sda: GPIO6
+    scl: GPIO7
+    low_power_mode: true
+    frequency: 100kHz
+    scan: false      # verified: single PCF8574 at 0x20, no daisy-chained board

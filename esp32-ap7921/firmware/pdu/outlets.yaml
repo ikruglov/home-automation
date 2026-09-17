@@ -1,0 +1,66 @@
+# Eight outlets with preserved output states across controller restarts.
+# Cold-start policy runs only when the RTC marker and live expander state indicate power loss.
+
+packages:
+  outlet_1: !include {file: outlet.yaml, vars: {n: "1", bit: "0"}}
+  outlet_2: !include {file: outlet.yaml, vars: {n: "2", bit: "1"}}
+  outlet_3: !include {file: outlet.yaml, vars: {n: "3", bit: "2"}}
+  outlet_4: !include {file: outlet.yaml, vars: {n: "4", bit: "3"}}
+  outlet_5: !include {file: outlet.yaml, vars: {n: "5", bit: "4"}}
+  outlet_6: !include {file: outlet.yaml, vars: {n: "6", bit: "5"}}
+  outlet_7: !include {file: outlet.yaml, vars: {n: "7", bit: "6"}}
+  outlet_8: !include {file: outlet.yaml, vars: {n: "8", bit: "7"}}
+
+esphome:
+  includes:
+    - pdu/cold_start.h
+  on_boot:
+    - priority: -100
+      then:
+        - lambda: |-
+            id(outlet_1).publish_state(!id(relay_expander).digital_read(0));
+            id(outlet_2).publish_state(!id(relay_expander).digital_read(1));
+            id(outlet_3).publish_state(!id(relay_expander).digital_read(2));
+            id(outlet_4).publish_state(!id(relay_expander).digital_read(3));
+            id(outlet_5).publish_state(!id(relay_expander).digital_read(4));
+            id(outlet_6).publish_state(!id(relay_expander).digital_read(5));
+            id(outlet_7).publish_state(!id(relay_expander).digital_read(6));
+            id(outlet_8).publish_state(!id(relay_expander).digital_read(7));
+        - if:
+            condition:
+              lambda: |-
+                uint8_t live = 0;
+                for (uint8_t i = 0; i < 8; i++) {
+                  if (!id(relay_expander).digital_read(i)) {
+                    live |= 1 << i;  // expander LOW = relay energized
+                  }
+                }
+                // A non-idle port proves the expander kept power, so this cannot
+                // be a cold start whatever the RTC marker survived as.
+                return pdu::is_cold_start() && live == 0;
+            then:
+              - lambda: "id(outlet_state_boot) = id(outlet_state);"
+              - script.execute: outlet_1_cold_start_apply
+              - script.execute: outlet_2_cold_start_apply
+              - script.execute: outlet_3_cold_start_apply
+              - script.execute: outlet_4_cold_start_apply
+              - script.execute: outlet_5_cold_start_apply
+              - script.execute: outlet_6_cold_start_apply
+              - script.execute: outlet_7_cold_start_apply
+              - script.execute: outlet_8_cold_start_apply
+
+globals:
+  - id: outlet_state
+    type: uint8_t
+    restore_value: true
+    initial_value: '0'
+  - id: outlet_state_boot
+    type: uint8_t
+    restore_value: false
+    initial_value: '0'
+
+pcf8574:
+  - id: relay_expander
+    i2c_id: i2c_outlets
+    address: 0x20
+    preserve_outputs: true

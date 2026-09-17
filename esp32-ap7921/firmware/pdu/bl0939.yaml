@@ -1,0 +1,41 @@
+# Total PDU input current and metering-chip temperature.
+# Current includes the PDU itself. The 0.625 multiplier is specific to this assembled board.
+# Estimated apparent power uses nominal voltage; it is not measured real power.
+
+substitutions:
+  nominal_voltage: "230"
+
+uart:
+  id: uart_meter
+  rx_pin:
+    number: GPIO4    # net METER_TX: BL0939 TX/SDO -> ESP RX
+    ignore_strapping_warning: true
+  tx_pin:
+    number: GPIO5    # BL0939 RX/SDI
+    ignore_strapping_warning: true
+  baud_rate: 4800
+  stop_bits: 2
+  parity: NONE
+
+sensor:
+  - platform: bl0939
+    uart_id: uart_meter
+    update_interval: 10s
+    current_1:
+      id: total_current
+      name: "Total Current"
+      filters:
+        - multiply: 0.625
+        - timeout: 35s
+    internal_temperature:
+      name: "Temperature"
+
+  - platform: copy
+    source_id: total_current
+    name: "Estimated Apparent Power"
+    unit_of_measurement: VA
+    device_class: apparent_power
+    state_class: measurement
+    accuracy_decimals: 1
+    filters:
+      - multiply: ${nominal_voltage}

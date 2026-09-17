@@ -1,0 +1,49 @@
+# Active-low status LED: network state and component/supply faults.
+# Keep the 10-second startup window equal to buttons.yaml boot_is_good_after.
+
+output:
+  - platform: gpio
+    id: led_red
+    pin:
+      number: GPIO10   # STATUS_RED
+      inverted: true
+  - platform: gpio
+    id: led_green
+    pin:
+      number: GPIO11   # STATUS_GREEN
+      inverted: true
+
+interval:
+  - interval: 125ms
+    then:
+      - lambda: |-
+          static uint32_t tick = 0;
+          tick++;
+          bool red = false;
+          bool green = false;
+          // A rail counts as failed once it has actually been sampled and reads
+          // well under the 24V nominal. NaN = no reading yet, which must not
+          // raise a fault during the first seconds after boot.
+          const float fault_volts = 20.0f;
+          const float v1 = id(psu1_voltage).state;
+          const float v2 = id(psu2_voltage).state;
+          const bool psu_fault = (!std::isnan(v1) && v1 < fault_volts) ||
+                                 (!std::isnan(v2) && v2 < fault_volts);
+          if ((App.get_app_state() & STATUS_LED_ERROR) != 0 || psu_fault) {
+            // Either a component called mark_failed() - e.g. the CH390 driver
+            // failing to install, or the PCF8574 not answering - or a 24V feed
+            // is down. Solid orange.
+            red = true;
+            green = true;
+          } else if (network::is_connected()) {
+            green = true;
+          } else if (millis() < 10000) {
+            // Booting: alternate green <-> orange at 4Hz by toggling red only.
+            green = true;
+            red = (tick & 1) != 0;
+          } else {
+            // No address. Flashing green at 1Hz (4 ticks on, 4 off).
+            green = (tick & 4) != 0;
+          }
+          id(led_red).set_state(red);
+          id(led_green).set_state(green);
