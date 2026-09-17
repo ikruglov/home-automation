@@ -16,6 +16,17 @@ An installed and working replacement controller bringing eight-outlet control an
 </td>
 </tr>
 <tr>
+<td align="center">
+<a href="esp32-water-meter/"><img src="esp32-water-meter/images/pcb-front.png" width="420" alt="Water-meter PCB layout, front copper view"></a><br>
+<sub>PCB layout · Work in progress</sub>
+</td>
+<td valign="top">
+<strong><a href="esp32-water-meter/">Water-meter reader</a></strong><br>
+An ESP32-C6 water-meter reader with 18650 backup power to keep counting through USB power interruptions. Two sensor inputs support a planned approach to rejecting false counts from small target movements. Assembled and tested; current firmware uses Wi-Fi and one sensor.<br><br>
+<sub>PCB design · ESP32-C6 · ESPHome · Battery backup · Dual sensor inputs</sub>
+</td>
+</tr>
+<tr>
 <td>
 <a href="esp32-create-ceiling-fan-tuya/"><img src="esp32-create-ceiling-fan-tuya/images/assembled-pcb-front.jpg" height="220" alt="Assembled ESP32-C3 replacement board"></a>
 </td>
@@ -42,16 +53,18 @@ A carrier PCB connecting existing Ethernet/PoE and isolated RS485 modules, with 
 | Project | Requirement | Approach | Boundary |
 |---|---|---|---|
 | AP7921 retrofit | Replace the controller and integrate outlet control and monitoring into Home Assistant | Four-layer controller PCB and ESPHome firmware, fitted to the existing enclosure and front panel | AP7921 mounting points and front-panel openings; USB-C replaces the serial connector |
+| Water-meter reader (in progress) | Keep counting through power interruptions and reject false counts at the detection boundary | 18650 backup, two sensor inputs, and ESP32-C6 with a future Zigbee option | Assembled and tested; current firmware uses one sensor and Wi-Fi |
 | Ceiling-fan retrofit | Expose the existing fan and light controls in Home Assistant | A custom ESP32-C3 board replaces the Wi-Fi interface and communicates with the retained controller over Tuya UART | Board fit and datapoint mappings are specific to the controller shown |
 | Climarad interface | Connect ventilation controls and measurements to Home Assistant; power the interface through PoE | A custom carrier PCB combines Ethernet/PoE and isolated RS485 modules; ESPHome maps Modbus registers into entities | Uses the unit's Modbus interface and requires its device address |
 
-All three projects use ESPHome's firmware framework and protocol components. The Climarad interface uses Waveshare modules for its ESP32, PoE, and isolated RS485 functions.
+All four projects use ESPHome's firmware framework and protocol components. The Climarad interface uses Waveshare modules for its ESP32, PoE, and isolated RS485 functions.
 
 ## Explore the projects
 
 | Project | Hardware | Firmware | Additional material |
 |---|---|---|---|
 | [APC AP7921](esp32-ap7921/) | [Four-layer controller overview](esp32-ap7921/#four-layer-controller-pcb) | [ESPHome configuration and components](esp32-ap7921/firmware/) | [Installed retrofit](esp32-ap7921/#board-swap-retrofit) · [USB-C insert STL](esp32-ap7921/usb-c-insert.stl) |
+| [Water-meter reader](esp32-water-meter/) | [KiCad design](esp32-water-meter/hardware/) | [ESPHome configuration](esp32-water-meter/firmware/) | [Case STL models](esp32-water-meter/case/) · [Development status](esp32-water-meter/#development-status) |
 | [Create ceiling fan](esp32-create-ceiling-fan-tuya/) | [KiCad design](esp32-create-ceiling-fan-tuya/kicad/) | [ESPHome configuration](esp32-create-ceiling-fan-tuya/esphome.yaml) | [Original and replacement hardware](esp32-create-ceiling-fan-tuya/#build-gallery) |
 | [Climarad Sensa V2X](esp32-climarad-v2x/) | [KiCad design](esp32-climarad-v2x/kicad/) | [ESPHome configuration](esp32-climarad-v2x/esphome.yaml) | [Printable enclosure](esp32-climarad-v2x/case.3mf) |
 

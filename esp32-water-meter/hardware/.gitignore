@@ -1,0 +1,7 @@
+*.kicad_prl
+*.kicad_sch.lck
+*.kicad_pcb.lck
+~*
+*-backups/
+production/
+fp-info-cache

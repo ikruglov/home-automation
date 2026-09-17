@@ -1,0 +1,14 @@
+packages:
+  common_base: !include common.yaml
+
+wifi:
+  ssid: !secret wifi_iot_ssid
+  password: !secret wifi_iot_password
+  power_save_mode: LIGHT
+  fast_connect: true
+
+sensor:
+  - platform: wifi_signal
+    name: "Wifi Signal"
+    update_interval: 60s
+    icon: mdi:wifi

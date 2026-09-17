@@ -1,0 +1,31 @@
+esphome:
+  on_boot:
+    priority: -100
+    then:
+      - logger.log: "Device booted"
+
+logger:
+  level: INFO
+
+api:
+  port: 6053
+  encryption: {}
+
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+
+button:
+  - platform: restart
+    name: "Restart"
+
+binary_sensor:
+  - platform: status
+    name: "Status"
+    device_class: connectivity
+
+sensor:
+  - platform: uptime
+    name: "Uptime Seconds"
+    update_interval: 60s
+    icon: mdi:clock-outline

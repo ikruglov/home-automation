@@ -1,0 +1,5 @@
+(sym_lib_table
+ (version 7)
+ (lib (name "FS8205A") (type "KiCad") (uri "${KIPRJMOD}/libraries/FS8205A.kicad_sym") (options "") (descr ""))
+ (lib (name "JLCImport") (type "KiCad") (uri "${KIPRJMOD}/libraries/JLCImport.kicad_sym") (options "") (descr ""))
+)

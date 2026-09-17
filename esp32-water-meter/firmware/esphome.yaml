@@ -1,0 +1,241 @@
+# Work in progress. Targets the custom water-meter board; see README.md.
+
+substitutions:
+  pulse_debounce: "200ms"
+  liters_per_pulse: "1"
+  persist_coalesce: "15s"
+  charger_debounce: "2s"
+
+packages:
+  common: !include common-wifi.yaml
+
+esphome:
+  name: water-meter
+  friendly_name: "Water Meter"
+  includes:
+    - usb_dp.h
+  on_boot:
+    - priority: 800
+      then:
+        - lambda: "usb_dp_pullup(false);"
+    - priority: -100
+      then:
+        - component.update: total_detections
+        - component.update: current_ticks
+
+esp32:
+  board: esp32-c6-devkitc-1
+  variant: esp32c6
+  flash_size: 8MB
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      CONFIG_PM_ENABLE: y
+      CONFIG_PM_DFS_INIT_AUTO: y
+
+logger:
+  hardware_uart: UART0
+
+api:
+  encryption:
+    key: !secret water_meter_api_encryption_key
+
+ota:
+  - platform: esphome
+    password: !secret water_meter_ota_password
+
+preferences:
+  flash_write_interval: 60s
+
+globals:
+  - id: tick_count
+    type: int
+    restore_value: yes
+    initial_value: "0"
+
+script:
+  - id: persist_counter
+    mode: single
+    then:
+      - delay: ${persist_coalesce}
+      - lambda: "global_preferences->sync();"
+
+switch:
+  - platform: gpio
+    pin: GPIO7
+    id: battery_charger
+    name: "Battery Charger"
+    icon: "mdi:battery-charging"
+    entity_category: config
+    restore_mode: ALWAYS_ON
+    inverted: true
+
+  - platform: gpio
+    pin: GPIO21
+    id: power_led
+    name: "Power LED"
+    icon: "mdi:led-on"
+    entity_category: config
+    restore_mode: ALWAYS_ON
+    inverted: true
+
+number:
+  - platform: template
+    id: base_value
+    name: "Initial Reading"
+    icon: "mdi:counter"
+    entity_category: config
+    unit_of_measurement: "m³"
+    device_class: water
+    mode: box
+    optimistic: true
+    min_value: 0
+    max_value: 1000000
+    step: 0.001
+    restore_value: yes
+    initial_value: 0
+    on_value:
+      then:
+        - component.update: total_detections
+
+sensor:
+  - platform: adc
+    pin: GPIO2
+    id: battery_voltage
+    name: "Battery Voltage"
+    icon: "mdi:battery"
+    device_class: voltage
+    state_class: measurement
+    entity_category: diagnostic
+    attenuation: 12db
+    unit_of_measurement: "V"
+    accuracy_decimals: 2
+    update_interval: 30s
+    filters:
+      - median:
+          window_size: 5
+          send_every: 1
+          send_first_at: 1
+      - multiply: 2.0
+
+  - platform: template
+    id: total_detections
+    name: "Total Water"
+    icon: "mdi:water"
+    device_class: water
+    state_class: total_increasing
+    unit_of_measurement: "m³"
+    accuracy_decimals: 3
+    lambda: "return id(base_value).state + id(tick_count) * ${liters_per_pulse} / 1000.0;"
+    update_interval: never
+
+  - platform: template
+    id: current_ticks
+    name: "Since Reset"
+    icon: "mdi:counter"
+    device_class: water
+    state_class: total_increasing
+    entity_category: diagnostic
+    unit_of_measurement: "L"
+    accuracy_decimals: 0
+    lambda: "return id(tick_count) * ${liters_per_pulse};"
+    update_interval: never
+
+binary_sensor:
+  - platform: gpio
+    pin: GPIO6
+    id: usb_power_connected
+    name: "USB Power Connected"
+    icon: "mdi:usb-port"
+    device_class: plug
+    entity_category: diagnostic
+    filters:
+      - delayed_on: 50ms
+      - delayed_off: 50ms
+    on_press:
+      then:
+        - lambda: "usb_dp_pullup(true);"
+    on_release:
+      then:
+        - lambda: "usb_dp_pullup(false);"
+
+  - platform: gpio
+    id: chrg_stdby
+    internal: true
+    pin:
+      number: GPIO22
+      inverted: true
+      mode:
+        input: true
+        pullup: true
+    filters:
+      - delayed_on_off: ${charger_debounce}
+    on_state:
+      then:
+        - component.update: charger_status
+
+  - platform: gpio
+    id: chrg_ch
+    internal: true
+    pin:
+      number: GPIO23
+      inverted: true
+      mode:
+        input: true
+        pullup: true
+    filters:
+      - delayed_on_off: ${charger_debounce}
+    on_state:
+      then:
+        - component.update: charger_status
+
+  - platform: gpio
+    id: proximity_trigger
+    internal: true
+    pin:
+      number: GPIO5
+      inverted: true
+      ignore_strapping_warning: true
+      mode:
+        input: true
+        pullup: true
+    filters:
+      - delayed_on_off: ${pulse_debounce}
+    on_press:
+      then:
+        - lambda: "id(tick_count) += 1;"
+        - component.update: total_detections
+        - component.update: current_ticks
+        - script.execute: persist_counter
+
+text_sensor:
+  - platform: template
+    id: charger_status
+    name: "Charger Status"
+    icon: "mdi:battery-charging"
+    entity_category: diagnostic
+    update_interval: 60s
+    lambda: |-
+      const bool charging = id(chrg_ch).state;
+      const bool full = id(chrg_stdby).state;
+      const char *out;
+      if (charging && full) { out = "Fault"; }
+      else if (charging)    { out = "Charging"; }
+      else if (full)        { out = "Full"; }
+      else                  { out = "Idle"; }
+      // update() publishes unconditionally, so suppress no-op republishes here.
+      if (id(charger_status).state == out) return {};
+      return {out};
+
+button:
+  - platform: template
+    id: reset_ticks
+    name: "Reset Ticks to Zero"
+    icon: "mdi:restart"
+    entity_category: config
+    on_press:
+      then:
+        - lambda: "id(tick_count) = 0;"
+        - component.update: total_detections
+        - component.update: current_ticks
+        - lambda: "global_preferences->sync();"
