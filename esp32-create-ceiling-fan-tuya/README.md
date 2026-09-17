@@ -2,7 +2,7 @@
 
 # Create ceiling-fan retrofit
 
-**A custom ESP32-C3 interface board and ESPHome configuration for fan, light, and buzzer control in Home Assistant.**
+**A custom ESP32-C3 interface board and ESPHome configuration for fan and light control in Home Assistant.**
 
 <img src="images/assembled-pcb-front.jpg" width="280" alt="Assembled replacement PCB, front: ESP32-C3 module, flash and reset buttons, and programming connections">
 <img src="images/assembled-pcb-back.jpg" width="280" alt="Assembled replacement PCB, back">
@@ -49,7 +49,32 @@ flowchart LR
     MCU --> LIGHT[Light]
 ```
 
-The published configuration disables UART logging to leave that serial interface available for communication with the fan controller. Fan, light, and buzzer entities use `ALWAYS_OFF` as their configured restore mode.
+The published configuration disables UART logging to leave that serial interface available for communication with the fan controller. Fan and light entities use `ALWAYS_OFF` as their configured restore mode.
+
+## Flashing and first boot
+
+The programming connection and Tuya communication share **GPIO20 (ESP RX) and GPIO21 (ESP TX)**. During flashing they connect to the USB–UART adapter; in normal operation they communicate with the fan controller.
+
+Flash the replacement board separately from the mains-powered controller, using a suitable 3.3 V supply and 3.3 V UART logic.
+
+| USB–UART adapter | Replacement board |
+|---|---|
+| TX | RX / GPIO20 |
+| RX | TX / GPIO21 |
+| GND | GND |
+
+1. Fit the **Flash jumper**, then press and release **Reset** to enter download mode.
+2. Flash the firmware.
+3. Remove the Flash jumper and disconnect the adapter's TX/RX leads before normal operation. Reset to boot the firmware.
+4. With power disconnected, install the replacement board in the matching controller. Verify operation through Wi-Fi/Home Assistant.
+
+The header's **EN-labelled contact is not connected to the ESP reset circuit in this design**; do not use it as an RTS auto-reset connection. Use the board's Reset control. See the [project flashing discussion](https://github.com/ikruglov/home-automation/issues/2#issuecomment-4596481200) and [Espressif's download-mode documentation](https://docs.espressif.com/projects/esptool/en/latest/esp32c3/advanced-topics/boot-mode-selection.html).
+
+### Repeated resets after a successful flash
+
+In [issue #2](https://github.com/ikruglov/home-automation/issues/2), a builder flashed successfully but then saw repeated resets while connected through a laptop dock. The board came online after moving the adapter to a power-only USB source; it also came online when fitted to the powered controller. The fan itself had not yet been connected in that report.
+
+Shared-UART interference was the suspected explanation: after boot, those pins carry Tuya traffic rather than a programming session. However, power and USB data conditions changed together, so the report does not isolate the reset cause. Disconnect the programmer's TX/RX for normal operation and check the power supply if resets continue. Keep `logger.baud_rate: 0`, as configured, to avoid injecting log messages into the Tuya UART. [ESPHome logger documentation](https://esphome.io/components/logger/#configuration-variables)
 
 ## Published firmware capabilities
 
@@ -59,7 +84,6 @@ The [ESPHome configuration](esphome.yaml) maps the following Tuya datapoints:
 |---|---|---|
 | Fan | 60, 62, 63 | On/off, six speed levels, direction |
 | Light | 20, 22 | On/off and brightness |
-| Buzzer | 66 | On/off |
 
 It also exposes connection status, Wi-Fi signal, uptime, and a restart button. Color-temperature settings are commented out in the published YAML and are not presented here as an implemented feature.
 

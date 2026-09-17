@@ -32,7 +32,7 @@ An ESP32-C6 water-meter reader with 18650 backup power to keep counting through 
 </td>
 <td valign="top">
 <strong><a href="esp32-create-ceiling-fan-tuya/">Create ceiling-fan retrofit</a></strong><br>
-A replacement PCB with an ESP32-C3 module, support components, and programming connections, fitted to the original fan controller. ESPHome provides fan, light, and buzzer control over Tuya UART.<br><br>
+A replacement PCB with an ESP32-C3 module, support components, and programming connections, fitted to the original fan controller. ESPHome provides fan and light control over Tuya UART.<br><br>
 <sub>PCB design · ESP32-C3 · Wi-Fi · Tuya UART</sub>
 </td>
 </tr>
